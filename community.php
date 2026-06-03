@@ -89,8 +89,8 @@
                             <p class="text-gray-500">05-01-2026</p>
                         </div>
                     </div>
-                    <div class="relative h-64 md:h-auto bg-gray-200">
-                        <img src="assets/images/manoj jain.png" alt="CS Manoj Jain" class="w-full h-full object-cover">
+                    <div class="relative h-80 md:h-auto bg-gray-200">
+                        <img src="assets/images/manoj jain.png" alt="CS Manoj Jain" class="w-full h-full object-cover object-[center_18%]">
                     </div>
                 </div>
             </div>
@@ -98,7 +98,7 @@
             <!-- Message 2: Narendra Jain -->
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                 <div class="grid grid-cols-1 md:grid-cols-2">
-                    <div class="relative h-64 md:h-auto bg-gray-200 order-2 md:order-1">
+                    <div class="relative h-80 md:h-auto bg-gray-200 order-2 md:order-1">
                         <img src="assets/images/narendra jain.png" alt="Narendra Jain"
                             class="w-full h-full object-cover object-top">
                     </div>
