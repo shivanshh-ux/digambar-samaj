@@ -55,6 +55,14 @@ include 'includes/sidebar.php';
                 <input type="email" value="support@jaindigambarmatrimony.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm">
             </div>
             
+            <hr class="border-gray-100 mt-6 mb-6">
+
+            <div>
+                <label class="block font-bold text-gray-800 mb-2">About Us YouTube Video URL</label>
+                <input type="text" value="https://www.youtube.com/embed/dQw4w9WgXcQ" placeholder="Enter YouTube Embed URL" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm">
+                <p class="text-xs text-gray-500 mt-1">This video will be displayed on the About Us page.</p>
+            </div>
+            
         </div>
     </div>
 

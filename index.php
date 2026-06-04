@@ -69,10 +69,7 @@
             <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">Digambar Jain Matrimony</h1>
             <p class="text-xl md:text-2xl text-gray-200 mb-8 hero-subtitle">Find Your Special Someone Who Completes You</p>
             
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="registration.php" class="bg-primary text-white px-8 py-3 rounded-md text-lg font-bold hover:bg-opacity-90 transition transform hover:-translate-y-1 shadow-lg"><i class="fas fa-user-plus mr-2"></i>Register Now</a>
-                <a href="login.php" class="bg-white text-primary px-8 py-3 rounded-md text-lg font-bold hover:bg-gray-100 transition transform hover:-translate-y-1 shadow-lg"><i class="fas fa-sign-in-alt mr-2"></i>Login</a>
-            </div>
+            
         </div>
     </div>
 </section>

@@ -9,43 +9,83 @@ $is_logged_in = isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Sidebar / Filters -->
             <div class="w-full md:w-1/4">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 sticky top-24">
-                    <h3 class="text-lg font-bold text-dark border-b pb-3 mb-4"><i class="fas fa-filter text-primary mr-2"></i> Refine Search</h3>
+                <div class="bg-white border border-gray-200 rounded-sm">
+                    <!-- Advanced Search Header -->
+                    <div class="bg-[#d9534f] text-white text-center py-2 font-medium">
+                        Advanced Search
+                    </div>
                     
-                    <!-- Filter groups -->
-                    <div class="mb-5">
-                        <label class="block font-semibold text-gray-700 mb-2 text-sm">Looking For</label>
-                        <select class="w-full border-gray-300 rounded p-2 text-sm bg-gray-50 border focus:border-primary focus:outline-none">
-                            <option>Bride</option>
-                            <option>Groom</option>
-                        </select>
+                    <!-- Search By City, Country etc -->
+                    <div class="bg-[#f2dede] text-[#a94442] text-center py-2 text-sm font-medium">
+                        Search By City, Country etc
                     </div>
-
-                    <div class="mb-5">
-                        <label class="block font-semibold text-gray-700 mb-2 text-sm">Age</label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" placeholder="18" class="w-1/2 border-gray-300 border rounded p-2 text-sm bg-gray-50 focus:border-primary focus:outline-none">
-                            <span class="text-gray-500 text-sm">to</span>
-                            <input type="number" placeholder="40" class="w-1/2 border-gray-300 border rounded p-2 text-sm bg-gray-50 focus:border-primary focus:outline-none">
+                    
+                    <div class="p-4">
+                        <!-- Bride / Groom Radio -->
+                        <div class="flex items-center gap-4 mb-3 text-sm text-gray-700">
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="gender" value="bride" checked class="accent-[#d9534f]"> Bride</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="gender" value="groom" class="accent-[#d9534f]"> Groom</label>
                         </div>
-                    </div>
-
-                    <div class="mb-5">
-                        <label class="block font-semibold text-gray-700 mb-2 text-sm">Religion / Sect</label>
-                        <select class="w-full border-gray-300 rounded p-2 text-sm bg-gray-50 border focus:border-primary focus:outline-none">
-                            <option>All Jain Sects</option>
+                        
+                        <!-- Country -->
+                        <select class="w-full border border-gray-300 rounded p-2 mb-3 text-sm text-gray-700 focus:outline-none focus:border-[#d9534f]">
+                            <option>India</option>
+                            <option>USA</option>
+                            <option>UK</option>
+                            <option>Canada</option>
+                            <option>Australia</option>
+                        </select>
+                        
+                        <!-- City -->
+                        <input type="text" placeholder="Enter City Name" class="w-full border border-gray-300 rounded p-2 mb-3 text-sm text-gray-700 focus:outline-none focus:border-[#d9534f]">
+                        
+                        <!-- Education -->
+                        <select class="w-full border border-gray-300 rounded p-2 mb-3 text-sm text-gray-700 focus:outline-none focus:border-[#d9534f]">
+                            <option>Education All</option>
+                            <option>Bachelors</option>
+                            <option>Masters</option>
+                            <option>Doctorate</option>
+                            <option>Diploma</option>
+                        </select>
+                        
+                        <!-- Sampraday -->
+                        <select class="w-full border border-gray-300 rounded p-2 mb-3 text-sm text-gray-700 focus:outline-none focus:border-[#d9534f]">
+                            <option>Sampraday All</option>
                             <option>Digambar</option>
                             <option>Shwetambar</option>
                             <option>Sthanakvasi</option>
                         </select>
-                    </div>
 
-                    <div class="mb-5">
-                        <label class="block font-semibold text-gray-700 mb-2 text-sm">Location</label>
-                        <input type="text" placeholder="City or State" class="w-full border-gray-300 border rounded p-2 text-sm bg-gray-50 focus:border-primary focus:outline-none">
+                        <!-- Age Group (Requested by User) -->
+                        <div class="flex items-center gap-2 mb-3 text-sm text-gray-700">
+                            <input type="number" placeholder="From" class="w-1/2 border border-gray-300 rounded p-2 focus:outline-none focus:border-[#d9534f]">
+                            <span class="text-gray-500">-</span>
+                            <input type="number" placeholder="To" class="w-1/2 border border-gray-300 rounded p-2 focus:outline-none focus:border-[#d9534f]">
+                        </div>
+                        
+                        <!-- Search Button -->
+                        <button class="w-full bg-[#d9534f] text-white font-medium py-2 rounded hover:bg-opacity-90 transition mt-2">
+                            Search
+                        </button>
                     </div>
-
-                    <button class="w-full bg-primary text-white font-bold py-2 rounded hover:bg-opacity-90 transition">Apply Filters</button>
+                    
+                    <!-- Latest Profile Header -->
+                    <div class="bg-[#f2dede] text-[#a94442] text-center py-2 text-sm font-medium border-t border-gray-200 mt-2">
+                        Latest Profile
+                    </div>
+                    
+                    <!-- Links -->
+                    <div class="p-4 flex flex-col gap-2 text-[#d9534f] text-sm">
+                        <a href="#" class="hover:underline">All Bride</a>
+                        <a href="#" class="hover:underline">All Groom</a>
+                        <a href="#" class="hover:underline">All Doctors</a>
+                        <a href="#" class="hover:underline">All LLB, LLM</a>
+                        <a href="#" class="hover:underline">All Engineers</a>
+                        <a href="#" class="hover:underline">All MBA, MCA</a>
+                        <a href="#" class="hover:underline">All CA, CS, ICWAI, CFS</a>
+                        <a href="#" class="hover:underline">All Manglik</a>
+                        <a href="#" class="hover:underline">All NRI</a>
+                    </div>
                 </div>
             </div>
 
