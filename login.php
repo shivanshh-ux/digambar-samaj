@@ -1,11 +1,31 @@
 <?php
 session_start();
+include 'includes/db.php';
 
-// Handle dummy login
+$error = '';
+
+// Handle login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['user_logged_in'] = true;
-    header('Location: index.php');
-    exit;
+    $email_or_mobile = htmlspecialchars($_POST['email']);
+    $password = $_POST['password'];
+
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR mobile = ?");
+        $stmt->execute([$email_or_mobile, $email_or_mobile]);
+        $user = $stmt->fetch();
+
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_logged_in'] = true;
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['full_name'];
+            header('Location: index.php');
+            exit;
+        } else {
+            $error = "Invalid email/mobile or password.";
+        }
+    } catch (PDOException $e) {
+        $error = "Login failed: " . $e->getMessage();
+    }
 }
 
 // Handle logout
@@ -27,6 +47,12 @@ include 'includes/header.php';
         </div>
         
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md" data-aos="fade-up" data-aos-delay="200">
+            <?php if ($error): ?>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 shadow-sm" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline"><?php echo $error; ?></span>
+                </div>
+            <?php endif; ?>
             <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
                 <form class="space-y-6" action="login.php" method="POST">
                     <div>
@@ -78,20 +104,6 @@ include 'includes/header.php';
                     </div>
                 </form>
                 
-                <div class="mt-6">
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-300"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-2 bg-white text-gray-500">
-                                Note
-                            </span>
-                        </div>
-                    </div>
-                    <div class="mt-6 text-center text-sm text-gray-600">
-                        For demo purposes, any credentials will log you in.
-                    </div>
                     <div class="mt-4 text-center text-sm">
                         Don't have an account? 
                         <a href="registration.php" class="font-bold text-primary hover:underline">

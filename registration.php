@@ -1,3 +1,121 @@
+<?php
+session_start();
+include 'includes/db.php';
+
+$success = '';
+$error = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Sanitize and get POST data
+    $full_name = htmlspecialchars($_POST['full_name']);
+    $mobile = $_POST['country_code'] . $_POST['mobile'];
+    $email = htmlspecialchars($_POST['email']);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $birth_date = $_POST['birth_date'];
+    $birth_time = $_POST['birth_time'];
+    $birth_place = htmlspecialchars($_POST['birth_place']);
+    $native = htmlspecialchars($_POST['native']);
+    $gotra = htmlspecialchars($_POST['gotra']);
+    $mama_gotra = htmlspecialchars($_POST['mama_gotra'] ?? '');
+    $manglik = $_POST['manglik'];
+    $height = htmlspecialchars($_POST['height']);
+    $weight = htmlspecialchars($_POST['weight']);
+    $gender = $_POST['gender'];
+    $permanent_address = htmlspecialchars($_POST['permanent_address']);
+    $pin_code = htmlspecialchars($_POST['pin_code']);
+    $current_address = htmlspecialchars($_POST['current_address']);
+    $education = htmlspecialchars($_POST['education']);
+    $hobbies = htmlspecialchars($_POST['hobbies']);
+    $partner_preference = htmlspecialchars($_POST['partner_preference']);
+    $monthly_income = htmlspecialchars($_POST['monthly_income']);
+    $marital_status = htmlspecialchars($_POST['marital_status']);
+    $handicapped = $_POST['handicapped'];
+    $languages = isset($_POST['languages']) ? implode(',', $_POST['languages']) : '';
+    $occupation = $_POST['occupation'];
+    $company_name = htmlspecialchars($_POST['company_name'] ?? '');
+    $designation = htmlspecialchars($_POST['designation'] ?? '');
+    $father_name = htmlspecialchars($_POST['father_name']);
+    $father_mobile = htmlspecialchars($_POST['father_mobile']);
+    $father_income = htmlspecialchars($_POST['father_income']);
+    $father_occupation = htmlspecialchars($_POST['father_occupation']);
+    $mother_name = htmlspecialchars($_POST['mother_name']);
+    $mother_mobile = htmlspecialchars($_POST['mother_mobile'] ?? '');
+    $mother_occupation = htmlspecialchars($_POST['mother_occupation'] ?? '');
+    $mother_occupation_details = htmlspecialchars($_POST['mother_occupation_details'] ?? '');
+    $brothers = (int)$_POST['brothers'];
+    $brothers_married = (int)($_POST['brothers_married'] ?? 0);
+    $brothers_unmarried = (int)($_POST['brothers_unmarried'] ?? 0);
+    $sisters = (int)$_POST['sisters'];
+    $sisters_married = (int)($_POST['sisters_married'] ?? 0);
+    $sisters_unmarried = (int)($_POST['sisters_unmarried'] ?? 0);
+    $subcast = htmlspecialchars($_POST['subcast']);
+    $custom_subcast = htmlspecialchars($_POST['custom_subcast'] ?? '');
+    $mandir = htmlspecialchars($_POST['mandir']);
+    $custom_mandir = htmlspecialchars($_POST['custom_mandir'] ?? '');
+    $ref1_name = htmlspecialchars($_POST['ref1_name'] ?? '');
+    $ref1_mobile = htmlspecialchars($_POST['ref1_mobile'] ?? '');
+    $ref1_relation = htmlspecialchars($_POST['ref1_relation'] ?? '');
+    $ref2_name = htmlspecialchars($_POST['ref2_name'] ?? '');
+    $ref2_mobile = htmlspecialchars($_POST['ref2_mobile'] ?? '');
+    $ref2_relation = htmlspecialchars($_POST['ref2_relation'] ?? '');
+
+    // Handle File Uploads
+    $upload_dir = 'uploads/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
+
+    $photo = '';
+    $family_photo = '';
+    $payment_screenshot = '';
+
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        $photo = $upload_dir . time() . '_photo_' . basename($_FILES['photo']['name']);
+        move_uploaded_file($_FILES['photo']['tmp_name'], $photo);
+    }
+    if (isset($_FILES['family_photo']) && $_FILES['family_photo']['error'] === UPLOAD_ERR_OK) {
+        $family_photo = $upload_dir . time() . '_family_' . basename($_FILES['family_photo']['name']);
+        move_uploaded_file($_FILES['family_photo']['tmp_name'], $family_photo);
+    }
+    if (isset($_FILES['payment_screenshot']) && $_FILES['payment_screenshot']['error'] === UPLOAD_ERR_OK) {
+        $payment_screenshot = $upload_dir . time() . '_payment_' . basename($_FILES['payment_screenshot']['name']);
+        move_uploaded_file($_FILES['payment_screenshot']['tmp_name'], $payment_screenshot);
+    }
+
+    try {
+        $stmt = $pdo->prepare("INSERT INTO users (
+            full_name, mobile, email, password, birth_date, birth_time, birth_place, native, gotra, mama_gotra, manglik,
+            height, weight, gender, permanent_address, pin_code, current_address, education, hobbies, partner_preference,
+            monthly_income, marital_status, handicapped, languages, occupation, company_name, designation, father_name,
+            father_mobile, father_income, father_occupation, mother_name, mother_mobile, mother_occupation,
+            mother_occupation_details, brothers, brothers_married, brothers_unmarried, sisters, sisters_married,
+            sisters_unmarried, subcast, custom_subcast, mandir, custom_mandir, ref1_name, ref1_mobile, ref1_relation,
+            ref2_name, ref2_mobile, ref2_relation, photo, family_photo, payment_screenshot
+        ) VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        )");
+
+        $stmt->execute([
+            $full_name, $mobile, $email, $password, $birth_date, $birth_time, $birth_place, $native, $gotra, $mama_gotra, $manglik,
+            $height, $weight, $gender, $permanent_address, $pin_code, $current_address, $education, $hobbies, $partner_preference,
+            $monthly_income, $marital_status, $handicapped, $languages, $occupation, $company_name, $designation, $father_name,
+            $father_mobile, $father_income, $father_occupation, $mother_name, $mother_mobile, $mother_occupation,
+            $mother_occupation_details, $brothers, $brothers_married, $brothers_unmarried, $sisters, $sisters_married,
+            $sisters_unmarried, $subcast, $custom_subcast, $mandir, $custom_mandir, $ref1_name, $ref1_mobile, $ref1_relation,
+            $ref2_name, $ref2_mobile, $ref2_relation, $photo, $family_photo, $payment_screenshot
+        ]);
+
+        $success = "Registration successful! You can now log in.";
+    } catch (PDOException $e) {
+        if ($e->getCode() == 23000) { // Integrity constraint violation: duplicate email
+            $error = "Email address is already registered.";
+        } else {
+            $error = "Registration failed: " . $e->getMessage();
+        }
+    }
+}
+?>
 <?php include 'includes/header.php'; ?>
 
 <section class="py-16 bg-light">
@@ -6,7 +124,21 @@
             <h1 class="text-3xl md:text-4xl font-bold text-center text-dark mb-4" data-aos="fade-up">Registration Form</h1>
             <p class="text-center text-gray-600 mb-8" data-aos="fade-up" data-aos-delay="100">Join the most trusted Digambar Jain Matrimony platform</p>
             
-            <form id="registrationForm" class="bg-white rounded-lg shadow-lg p-6 md:p-8" data-aos="fade-up" data-aos-delay="200">
+            <?php if ($success): ?>
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Success!</strong>
+                    <span class="block sm:inline"><?php echo $success; ?></span>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($error): ?>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline"><?php echo $error; ?></span>
+                </div>
+            <?php endif; ?>
+
+            <form id="registrationForm" method="POST" action="" enctype="multipart/form-data" class="bg-white rounded-lg shadow-lg p-6 md:p-8" data-aos="fade-up" data-aos-delay="200">
                 <!-- Section 1: Basic Information -->
                 <div class="mb-8 pb-4 border-b border-gray-200">
                     <h2 class="text-xl font-bold text-primary mb-4">Section 1: Basic Information</h2>
@@ -562,7 +694,7 @@ document.getElementById('registrationForm')?.addEventListener('submit', function
         return;
     }
 
-    alert('Registration submitted successfully! (Demo - Static Website)');
+    e.target.submit();
 });
 </script>
 
