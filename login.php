@@ -18,6 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_logged_in'] = true;
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['full_name'];
+
+            if ($user['status'] === 'account_pending' || $user['status'] === 'pending') {
+                header('Location: waiting-approval.php');
+                exit;
+            } elseif ($user['status'] === 'account_approved') {
+                header('Location: registration.php');
+                exit;
+            }
+
             header('Location: index.php');
             exit;
         } else {
@@ -100,7 +109,7 @@ include 'includes/header.php';
                 
                     <div class="mt-4 text-center text-sm">
                         Don't have an account? 
-                        <a href="registration.php" class="font-bold text-primary hover:underline">
+                        <a href="register.php" class="font-bold text-primary hover:underline">
                             Sign up here
                         </a>
                     </div>

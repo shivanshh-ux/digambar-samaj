@@ -2,15 +2,31 @@
 session_start();
 include 'includes/db.php';
 
+// Access Check for Stage 2
+if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
+    header("Location: login.php");
+    exit;
+}
+
+$user_id = $_SESSION['user_id'];
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->execute([$user_id]);
+$current_user = $stmt->fetch();
+
+if (!$current_user || $current_user['status'] !== 'account_approved') {
+    if ($current_user && ($current_user['status'] === 'account_pending' || $current_user['status'] === 'pending')) {
+        header("Location: waiting-approval.php");
+        exit;
+    }
+    header("Location: index.php");
+    exit;
+}
+
 $success = '';
 $error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Sanitize and get POST data
-    $full_name = htmlspecialchars($_POST['full_name']);
-    $mobile = $_POST['country_code'] . $_POST['mobile'];
-    $email = htmlspecialchars($_POST['email']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    // Get POST data (excluding fields already collected in Stage 1)
     $birth_date = $_POST['birth_date'];
     $birth_time = $_POST['birth_time'];
     $birth_place = htmlspecialchars($_POST['birth_place']);
@@ -62,9 +78,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ref2_relation = htmlspecialchars($_POST['ref2_relation'] ?? '');
 
     // PHP Validations
-    if (!preg_match('/^[0-9]{10}$/', $_POST['mobile'])) {
-        $error = "Candidate mobile number must be exactly 10 digits.";
-    } elseif (!preg_match('/^[0-9]{4,6}$/', $pin_code)) {
         $error = "Pin code must be 4 to 6 digits.";
     } elseif (!is_numeric($monthly_income) || $monthly_income < 0) {
         $error = "Candidate monthly income must be a valid positive amount.";
@@ -107,42 +120,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (
-            full_name, mobile, email, password, birth_date, birth_time, birth_place, native_place, gotra, mama_gotra, manglik,
-            height, weight, gender, permanent_address, pin_code, current_address, higher_education, hobbies, partner_preference,
-            monthly_income, marital_status, handicapped, languages, occupation, company_name, designation, father_name,
-            father_mobile, father_income, father_occupation, mother_name, mother_mobile, mother_occupation,
-            mother_occupation_details, brothers, brothers_married, brothers_unmarried, sisters, sisters_married,
-            sisters_unmarried, subcast, custom_subcast, mandir, custom_mandir, ref1_name, ref1_mobile, ref1_relation,
-            ref2_name, ref2_mobile, ref2_relation, profile_photo, family_photo, payment_screenshot, status
-        ) VALUES (
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending'
-        )");
+        $stmt = $pdo->prepare("UPDATE users SET 
+            birth_date=?, birth_time=?, birth_place=?, native_place=?, gotra=?, mama_gotra=?, manglik=?,
+            height=?, weight=?, gender=?, permanent_address=?, pin_code=?, current_address=?, higher_education=?, hobbies=?, partner_preference=?,
+            monthly_income=?, marital_status=?, handicapped=?, languages=?, occupation=?, company_name=?, designation=?, father_name=?,
+            father_mobile=?, father_income=?, father_occupation=?, mother_name=?, mother_mobile=?, mother_occupation=?,
+            mother_occupation_details=?, brothers=?, brothers_married=?, brothers_unmarried=?, sisters=?, sisters_married=?,
+            sisters_unmarried=?, subcast=?, custom_subcast=?, mandir=?, custom_mandir=?, ref1_name=?, ref1_mobile=?, ref1_relation=?,
+            ref2_name=?, ref2_mobile=?, ref2_relation=?, profile_photo=?, family_photo=?, payment_screenshot=?, status='pending'
+            WHERE id=?
+        ");
 
         $stmt->execute([
-            $full_name, $mobile, $email, $password, $birth_date, $birth_time, $birth_place, $native, $gotra, $mama_gotra, $manglik,
+            $birth_date, $birth_time, $birth_place, $native, $gotra, $mama_gotra, $manglik,
             $height, $weight, $gender, $permanent_address, $pin_code, $current_address, $education, $hobbies, $partner_preference,
             $monthly_income, $marital_status, $handicapped, $languages, $occupation, $company_name, $designation, $father_name,
             $father_mobile, $father_income, $father_occupation, $mother_name, $mother_mobile, $mother_occupation,
             $mother_occupation_details, $brothers, $brothers_married, $brothers_unmarried, $sisters, $sisters_married,
             $sisters_unmarried, $subcast, $custom_subcast, $mandir, $custom_mandir, $ref1_name, $ref1_mobile, $ref1_relation,
-            $ref2_name, $ref2_mobile, $ref2_relation, $photo, $family_photo, $payment_screenshot
+            $ref2_name, $ref2_mobile, $ref2_relation, $photo, $family_photo, $payment_screenshot, $user_id
         ]);
 
-        $user_id = $pdo->lastInsertId();
-        $_SESSION['user_logged_in'] = true;
-        $_SESSION['user_id'] = $user_id;
-        $_SESSION['user_name'] = $full_name;
-
-        $success = "Registration successful! Welcome to the community.";
+        $success = "Registration successful! Your profile has been sent for approval.";
     } catch (PDOException $e) {
-        if ($e->getCode() == 23000) { // Integrity constraint violation: duplicate email
-            $error = "Email address is already registered.";
-        } else {
-            $error = "Registration failed: " . $e->getMessage();
-        }
-    }
+        $error = "Registration failed: " . $e->getMessage();
     }
 }
 ?>
@@ -157,7 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php if ($success): ?>
                 <script>
                     sessionStorage.removeItem("registrationFormData");
-                    window.location.href = "my-profile.php";
+                    window.location.href = "waiting-approval.php";
                 </script>
             <?php endif; ?>
             
@@ -178,23 +179,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <!-- Candidate Full Name -->
                     <div class="mb-4">
                         <label class="block text-gray-700 font-medium mb-2">Candidate Full Name (प्रत्याशी का नाम) *</label>
-                        <input type="text" name="full_name" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-primary">
+                        <input type="text" name="full_name" value="<?= htmlspecialchars($current_user['full_name']) ?>" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 cursor-not-allowed">
                     </div>
                     
                     <!-- Country Code & Mobile -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-gray-700 font-medium mb-2">Country Code *</label>
-                            <select name="country_code" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
-                                <option value="+91">+91 (India)</option>
-                                <option value="+1">+1 (USA)</option>
-                                <option value="+44">+44 (UK)</option>
-                                <option value="+61">+61 (Australia)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">Mobile Number (WhatsApp) *</label>
-                            <input type="tel" name="mobile" pattern="[0-9]{10}" maxlength="10" minlength="10" title="Please enter exactly 10 digits" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <label class="block text-gray-700 font-medium mb-2">Mobile Number</label>
+                            <input type="tel" name="mobile" value="<?= htmlspecialchars($current_user['mobile']) ?>" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 cursor-not-allowed">
                         </div>
                     </div>
                 </div>
@@ -245,35 +237,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div><label class="block text-gray-700 font-medium mb-2">Permanent Full Address *</label><textarea name="permanent_address" required rows="2" class="w-full border rounded-lg px-4 py-2"></textarea></div>
                         <div><label class="block text-gray-700 font-medium mb-2">Pin Code of Permanent Address *</label><input type="text" name="pin_code" pattern="[0-9]{4,6}" maxlength="6" minlength="4" title="Please enter a valid 4 to 6 digit pin code" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required class="w-full border rounded-lg px-4 py-2"></div>
                         <div><label class="block text-gray-700 font-medium mb-2">Candidate Current Address *</label><textarea name="current_address" required rows="2" class="w-full border rounded-lg px-4 py-2"></textarea></div>
-                        <div><label class="block text-gray-700 font-medium mb-2">Email *</label><input type="email" name="email" required class="w-full border rounded-lg px-4 py-2"></div>
-                        
-                        <!-- Password -->
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">Password *</label>
-                            <div class="relative">
-                                <input type="password" name="password" id="password" required class="w-full border rounded-lg px-4 py-2 pr-10">
-                                <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700" onclick="togglePassword('password', 'eye_icon_pass')">
-                                    <svg id="eye_icon_pass" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Confirm Password -->
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">Confirm Password *</label>
-                            <div class="relative">
-                                <input type="password" name="confirm_password" id="confirm_password" required class="w-full border rounded-lg px-4 py-2 pr-10">
-                                <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700" onclick="togglePassword('confirm_password', 'eye_icon_conf')">
-                                    <svg id="eye_icon_conf" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+                        <div><label class="block text-gray-700 font-medium mb-2">Email *</label><input type="email" name="email" value="<?= htmlspecialchars($current_user['email']) ?>" readonly class="w-full border rounded-lg px-4 py-2 bg-gray-100 cursor-not-allowed"></div>
 
                         <div><label class="block text-gray-700 font-medium mb-2">Higher Education *</label><input type="text" name="education" required class="w-full border rounded-lg px-4 py-2"></div>
                         <div><label class="block text-gray-700 font-medium mb-2">Hobbies *</label><textarea name="hobbies" required rows="2" class="w-full border rounded-lg px-4 py-2"></textarea></div>
@@ -514,17 +478,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </section>
 
 <script>
-function togglePassword(inputId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
-    } else {
-        input.type = 'password';
-        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
-    }
-}
 
 document.querySelectorAll('input[name="is_digambar"]').forEach(radio => {
     radio.addEventListener('change', function() {

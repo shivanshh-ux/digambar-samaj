@@ -29,8 +29,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <a href="members.php" class="flex items-center px-3 py-2.5 rounded-md transition-colors <?= $current_page == 'members.php' ? 'bg-primary text-white font-semibold' : 'text-gray-300 hover:bg-gray-700 hover:text-white' ?>">
                 <span>All Members</span>
             </a>
+            <a href="account-approvals.php" class="flex items-center px-3 py-2.5 rounded-md transition-colors <?= $current_page == 'account-approvals.php' ? 'bg-primary text-white font-semibold' : 'text-gray-300 hover:bg-gray-700 hover:text-white' ?>">
+                <span>Account Approvals</span>
+            </a>
             <a href="members-approval.php" class="flex items-center px-3 py-2.5 rounded-md transition-colors <?= $current_page == 'members-approval.php' ? 'bg-primary text-white font-semibold' : 'text-gray-300 hover:bg-gray-700 hover:text-white' ?>">
-                <span>Members Approval</span>
+                <span>Profile Approvals</span>
             </a>
             <a href="members-approved.php" class="flex items-center px-3 py-2.5 rounded-md transition-colors <?= $current_page == 'members-approved.php' ? 'bg-primary text-white font-semibold' : 'text-gray-300 hover:bg-gray-700 hover:text-white' ?>">
                 <span>Approved Members</span>

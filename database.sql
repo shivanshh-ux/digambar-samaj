@@ -55,7 +55,7 @@ CREATE TABLE users (
     profile_photo_drive_url TEXT,
     payment_screenshot VARCHAR(255),
     payment_proof_drive_url TEXT,
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    status ENUM('account_pending', 'account_approved', 'pending', 'approved', 'rejected', 'blocked') DEFAULT 'account_pending',
     verified BOOLEAN DEFAULT FALSE,
     approved_by BIGINT UNSIGNED NULL,
     approved_at DATETIME NULL,
